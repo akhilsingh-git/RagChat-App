@@ -10,3 +10,5 @@ class Document(Base):
     id = Column(String, primary_key=True, index=True)
     text_content = Column(Text, nullable=False)
     embedding = Column(Vector(384))
+
+

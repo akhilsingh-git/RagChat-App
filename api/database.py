@@ -15,6 +15,7 @@ if not DATABASE_URL:
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+
 # Dependency to get a DB session in API routes
 def get_db():
     db = SessionLocal()

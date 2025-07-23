@@ -9,3 +9,4 @@ def get_top_k_documents(db: Session, query_embedding: np.ndarray, k: int):
     # The <#> operator calculates the dot product for similarity
     results = db.query(models.Document).order_by(models.Document.embedding.max_inner_product(query_embedding)).limit(k).all()
     return results
+
