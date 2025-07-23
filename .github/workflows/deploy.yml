@@ -71,22 +71,31 @@ jobs:
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           request_pty: true
           script: |
-            # Navigate to the project directory
             cd ~/rag-app
-            
-            # Start only the database service in the background
+       
+             # Ensure Docker is running (add a check for readiness)
+            echo "Checking if Docker is installed and running..."
+            if ! sudo systemctl is-active --quiet docker; then
+             echo "Docker is not running. Attempting to start..."
+             sudo systemctl start docker
+            fi
+            sudo docker --version  # Log Docker version for debugging
+      
+            # Start only the database service in the background (use 'docker compose')
             echo "Starting database service..."
-            sudo docker-compose up -d db
-            
-            # Wait for the database to initialize
+            sudo docker compose up -d db
+      
+            # Wait for the database to initialize (increase sleep if needed for reliability)
             echo "Waiting for database to be ready..."
-            sleep 15
-            
-            # Run the database migration inside a temporary container.
-            # This is the best practice as it uses the app's environment.
+            sleep 30  # Adjusted to 30 seconds; monitor logs to fine-tune
+      
+            # Run the database migration inside a temporary container
             echo "Running database migration..."
-            sudo docker-compose run --rm app python migrate_db.py
-            
-            # Now, bring up the entire application stack, rebuilding the app if needed.
+            sudo docker compose run --rm app python migrate_db.py
+      
+            # Now, bring up the entire application stack, rebuilding if needed
             echo "Starting application..."
-            sudo docker-compose up --build -d
+            sudo docker compose up --build -d
+      
+            # Optional: Log container status for verification
+            sudo docker compose ps
