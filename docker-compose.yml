@@ -1,0 +1,32 @@
+services:
+  # The PostgreSQL Database Service with pgvector
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: rag_db
+    environment:
+      - POSTGRES_USER=raguser
+      - POSTGRES_PASSWORD=ragpassword
+      - POSTGRES_DB=ragdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  # The RAG Application Service
+  app:
+    container_name: rag_app
+    # Build the image from the Dockerfile in the current directory
+    build: .
+    ports:
+      - "8000:8000"
+    # Depend on the database service
+    depends_on:
+      - db
+    # Pass the database connection string as an environment variable
+    environment:
+      - DATABASE_URL=postgresql://raguser:ragpassword@db:5432/ragdb
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
