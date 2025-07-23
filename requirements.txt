@@ -5,16 +5,11 @@ sentence-transformers
 torch
 transformers
 numpy
-python-multipart
-tensorflow
-tf-keras
 gunicorn
-# New dependencies for PostgreSQL
 sqlalchemy
 psycopg2-binary
 pgvector
 python-dotenv
-# New dependencies for observability
 structlog
 prometheus-fastapi-instrumentator
 python-json-logger
