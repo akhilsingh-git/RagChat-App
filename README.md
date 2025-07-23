@@ -1,99 +1,102 @@
-Production-Ready RAG System
-This repository contains a complete, production-ready Retrieval-Augmented Generation (RAG) system. It features a custom vector database, a full-stack web application with a real-time chat interface, and a fully automated CI/CD pipeline for deployment to AWS EC2.
+# 🧠 Production-Ready RAG System
 
-<!-- Replace with a URL to a screenshot of your app -->
+This repository contains a complete, **production-ready Retrieval-Augmented Generation (RAG) system**. It features:
 
-✨ Features
-Custom Vector Database: Built from scratch using Python, supporting pgvector for persistent storage.
+- A custom vector database with `pgvector` support
+- A full-stack web app with real-time streaming chat
+- Automated CI/CD pipeline to AWS EC2 with Terraform + GitHub Actions
 
-High-Speed Search: Implements an HNSW index for fast Approximate Nearest Neighbor (ANN) search.
+---
 
-Advanced RAG Pipeline: A sophisticated two-stage retrieval process using a bi-encoder for initial search and a cross-encoder for re-ranking, combined with Reciprocal Rank Fusion (RRF) for optimal relevance.
+## ✨ Features
 
-Streaming Chat Interface: A responsive frontend built with vanilla JavaScript that streams answers token-by-token for an excellent user experience.
+- ✅ **Custom Vector DB**: Built from scratch in Python, with optional `pgvector` for persistence
+- ⚡ **High-Speed ANN Search**: Uses HNSW index for fast vector retrieval
+- 🧠 **Advanced RAG Pipeline**: Bi-encoder → cross-encoder re-ranking → RRF fusion
+- 💬 **Streaming Chat Interface**: Real-time token-by-token response via Server-Sent Events (SSE)
+- 🔧 **FastAPI Backend**: Serves both REST API and frontend UI
+- 🚀 **CI/CD + Infra as Code**: Fully automated AWS deployment with Terraform + GitHub Actions
+- 📊 **Built-in Observability**: Prometheus `/metrics` + structured logging
 
-Production-Grade Backend: A robust FastAPI backend serving the API and frontend.
+---
 
-End-to-End Automation: Fully automated infrastructure provisioning (Terraform) and application deployment (GitHub Actions) to AWS EC2.
+## 🛠️ Tech Stack
 
-Built-in Observability: Structured logging and a Prometheus metrics endpoint (/metrics) for monitoring.
+| Category     | Technologies                                                                 |
+|--------------|-------------------------------------------------------------------------------|
+| **Backend**  | FastAPI, Gunicorn                                                            |
+| **Database** | PostgreSQL + `pgvector`                                                      |
+| **Frontend** | HTML, Tailwind CSS, Vanilla JS (with SSE)                                    |
+| **AI Models**| `bge-micro` (embedding), `MiniLM` (re-ranking), `distilgpt2` (generation)     |
+| **DevOps**   | Docker, Docker Compose, Terraform, GitHub Actions                            |
+| **Cloud**    | AWS EC2                                                                      |
 
-🛠️ Technology Stack
-Category
+---
 
-Technology
+## 🚀 Getting Started (Local)
 
-Backend
+> This project is fully containerized — ready to spin up locally in minutes.
 
-FastAPI, Gunicorn
+### 🧩 Prerequisites
 
-Database
+- Docker + Docker Compose
+- Python 3.10+
+- PostgreSQL client (optional for manual DB access)
 
-PostgreSQL + pgvector
+### 📦 Clone the Repository
 
-Frontend
-
-HTML, CSS, Vanilla JavaScript (with SSE)
-
-AI Models
-
-bge-micro (Embedding), ms-marco-MiniLM-L-6-v2 (Re-ranking), distilgpt2 (Generation)
-
-DevOps
-
-Docker, Docker Compose, Terraform, GitHub Actions
-
-Cloud
-
-AWS EC2
-
-🚀 Running Locally
-This project is fully containerized, making it easy to run locally with a single command.
-
-Prerequisites:
-
-Docker
-
-Docker Compose
-
-Instructions:
-
-Clone the repository:
-
+```bash
 git clone https://github.com/your-username/your-repo-name.git
 cd your-repo-name
-
-Create the environment file:
-Create a .env file in the root directory and add the following line:
-
+🛠️ Create a .env File
+env
+Copy
+Edit
 DATABASE_URL=postgresql://raguser:ragpassword@localhost:5432/ragdb
-
-Start the database:
-
+🐘 Start the Vector Database
+bash
+Copy
+Edit
 docker-compose up -d db
-
-Run the database migration:
-This script will create the necessary tables and populate the database with the sample data.
-
-# Install dependencies locally for the script
+🧱 Run Migrations + Load Data
+bash
+Copy
+Edit
 pip install -r requirements.txt
 python migrate_db.py
-
-Launch the application:
-
+🚀 Launch the Full App
+bash
+Copy
+Edit
 docker-compose up --build
+Visit: http://localhost:8000
 
-The application will be available at http://localhost:8000.
+📈 Roadmap / Future Improvements
+Area	Enhancement
+Evaluation	Add RAG evaluation pipeline using RAGAs
+Model Quality	Upgrade to LLaMA 3 or Mistral 7B with quantization
+Database Resilience	Move from containerized Postgres to managed RDS
+Frontend Hosting	Serve static UI via Vercel or AWS S3 + CloudFront
+Security	Add AuthN/Z to APIs + stricter AWS security group rules
 
-📈 Future Roadmap
-While this is a complete and robust system, the following enhancements would be the next steps for scaling and improving quality:
+🖼️ Screenshot
+(Insert a screenshot or demo GIF here to showcase the chat interface)
 
-RAG Evaluation Framework: Implement an offline evaluation pipeline using a framework like RAGAs to quantitatively measure faithfulness, answer_relevancy, and context_recall before deploying changes.
+📄 License
+MIT © Your Name
 
-More Powerful Generator: Upgrade from distilgpt2 to a more advanced open-source model (like a fine-tuned Llama 3) for higher-quality answer synthesis.
+🙋‍♂️ Questions?
+Feel free to open issues or reach out at @yourhandle
 
-Managed Database Service: For true production resilience, migrate the self-hosted PostgreSQL container to a managed service like Amazon RDS for PostgreSQL.
+yaml
+Copy
+Edit
 
-Separate Frontend Deployment: Decouple the frontend from the backend API by deploying it as a static site to a service like Vercel or AWS S3/CloudFront for better performance and scalability.
+---
 
-Enhanced Security: Implement authentication on API endpoints and tighten the security group rules to restrict access to known IP addresses.
+Let me know if you want:
+- the `docker-compose.yml` and `migrate_db.py` templates
+- a copy of the Terraform config
+- or help with GitHub Actions for CI/CD
+
+I can also auto-generate all of these for you.
