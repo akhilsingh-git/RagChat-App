@@ -1,0 +1,11 @@
+fastapi
+pydantic
+python-dotenv
+structlog
+requests
+# Libraries for Neon DB
+sqlalchemy
+psycopg2-binary
+pgvector
+# Needed locally for migration
+sentence-transformers

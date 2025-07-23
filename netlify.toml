@@ -1,0 +1,13 @@
+[build]
+  # Command to install your Python dependencies
+  command = "pip install -r requirements.txt"
+  # Directory where your serverless functions are located
+  functions = "api/"
+  # Directory containing your static frontend files
+  publish = "public/"
+
+# This rule makes your Python API handle all requests
+[[redirects]]
+  from = "/*"
+  to = "/api/index"
+  status = 200
