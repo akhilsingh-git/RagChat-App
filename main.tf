@@ -44,7 +44,7 @@ resource "aws_instance" "rag_app_server" {
   # Ubuntu 24.04 LTS AMI for the ap-south-1 region.
   # Find the correct AMI ID for your region if you change it.
   ami           = "ami-0f5ee92e2d63afc18"
-  instance_type = "t4g.large" # As requested
+  instance_type = "t3a.large" # As requested
 
   # Associate the security group created above
   vpc_security_group_ids = [aws_security_group.rag_app_sg.id]
