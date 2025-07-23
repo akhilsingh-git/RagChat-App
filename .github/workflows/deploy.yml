@@ -1,0 +1,83 @@
+name: Deploy RAG App to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  # Job to provision or update infrastructure using Terraform
+  terraform:
+    name: 'Terraform Apply'
+    runs-on: ubuntu-latest
+    outputs:
+      # This output will be used by the next job
+      public_ip: ${{ steps.apply.outputs.public_ip }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1 # Must match the region in your .tf file
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Apply
+        id: apply
+        run: |
+          terraform apply -auto-approve
+          # Extract the public IP output from Terraform and set it for the next job
+          echo "public_ip=$(terraform output -raw instance_public_ip)" >> $GITHUB_OUTPUT
+
+  # Job to deploy the application to the newly created EC2 instance
+  deploy:
+    name: 'Deploy Application'
+    runs-on: ubuntu-latest
+    # This job depends on the terraform job completing successfully
+    needs: terraform
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ needs.terraform.outputs.public_ip }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          script: |
+            # Create the project directory
+            mkdir -p ~/rag-app
+            
+      - name: Copy Files to EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ needs.terraform.outputs.public_ip }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          source: "."
+          target: "~/rag-app"
+          
+      - name: Run Docker Compose on EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ needs.terraform.outputs.public_ip }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          script: |
+            # Navigate to the project directory and run docker-compose
+            cd ~/rag-app
+            docker-compose up --build -d
