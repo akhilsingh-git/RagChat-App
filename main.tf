@@ -41,9 +41,9 @@ resource "aws_security_group" "rag_app_sg" {
 
 # 2. Define the EC2 Instance
 resource "aws_instance" "rag_app_server" {
-  # Ubuntu 24.04 LTS AMI for the us-east-1 region.
+  # Ubuntu 24.04 LTS AMI for the ap-south-1 region.
   # Find the correct AMI ID for your region if you change it.
-  ami           = "ami-04b70fa74e45c3917"
+  ami           = "ami-0f5ee92e2d63afc18"
   instance_type = "t4g.large" # As requested
 
   # Associate the security group created above
