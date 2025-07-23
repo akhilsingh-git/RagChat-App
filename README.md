@@ -46,8 +46,7 @@ This repository contains a complete, **production-ready Retrieval-Augmented Gene
 ### 📦 Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name
+git clone (https://github.com/akhilsingh-git/Shopos-RagApp.git)
 
 🛠️ Create a .env File
 DATABASE_URL=postgresql://raguser:ragpassword@localhost:5432/ragdb
@@ -74,8 +73,7 @@ Security	Add AuthN/Z to APIs + stricter AWS security group rules
 
 🖼️ Screenshot
 (Insert a screenshot or demo GIF here to showcase the chat interface)
-<img width="752" height="952" alt="Screenshot 2025-07-23 at 1 54 31 PM" src="https://github.com/user-attachments/assets/62762616-a7f5-4e5b-9e6a-c4bb243d8c66" />
-
+![Diagram](https://github.com/user-attachments/assets/62762616-a7f5-4e5b-9e6a-c4bb243d8c66)
 
 🙋‍♂️ Questions?
 Feel free to open issues or reach out at singhakhil2018@gmail.com
