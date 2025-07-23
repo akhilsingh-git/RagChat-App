@@ -1,4 +1,4 @@
-# 🧠 Production-Ready RAG System
+# 🧠 Shopos RAG System
 
 This repository contains a complete, **production-ready Retrieval-Augmented Generation (RAG) system**. It features:
 
@@ -77,8 +77,5 @@ Security	Add AuthN/Z to APIs + stricter AWS security group rules
 <img width="752" height="952" alt="Screenshot 2025-07-23 at 1 54 31 PM" src="https://github.com/user-attachments/assets/62762616-a7f5-4e5b-9e6a-c4bb243d8c66" />
 
 
-
 🙋‍♂️ Questions?
 Feel free to open issues or reach out at singhakhil2018@gmail.com
-
----
