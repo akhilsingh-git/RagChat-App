@@ -5,7 +5,7 @@ name: Deploy RAG App to EC2
 on:
   push:
     branches:
-      - main-V2
+      - main
 
 jobs:
   # Job to provision or update infrastructure using Terraform
@@ -53,16 +53,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ needs.terraform.outputs.public_ip }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          script: |
-            # Create the project directory
-            mkdir -p ~/rag-app
             
       - name: Copy Files to EC2
         uses: appleboy/scp-action@master
@@ -73,14 +63,30 @@ jobs:
           source: "."
           target: "~/rag-app"
           
-      - name: Run Docker Compose on EC2
+      - name: Deploy and Run Application on EC2
         uses: appleboy/ssh-action@master
         with:
           host: ${{ needs.terraform.outputs.public_ip }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          request_pty: true
           script: |
             # Navigate to the project directory
             cd ~/rag-app
-            # Use sudo to ensure the docker command is found and has permissions
+            
+            # Start only the database service in the background
+            echo "Starting database service..."
+            sudo docker compose up -d db
+            
+            # Wait for the database to initialize
+            echo "Waiting for database to be ready..."
+            sleep 15
+            
+            # Run the database migration inside a temporary container.
+            # This is the best practice as it uses the app's environment.
+            echo "Running database migration..."
+            sudo docker compose run --rm app python migrate_db.py
+            
+            # Now, bring up the entire application stack, rebuilding the app if needed.
+            echo "Starting application..."
             sudo docker compose up --build -d
