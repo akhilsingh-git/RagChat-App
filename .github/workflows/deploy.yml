@@ -56,7 +56,7 @@ jobs:
 
       - name: Wait for EC2 to be ready
         run: |
-          echo "Waiting for 30 seconds for EC2 instance to initialize..."
+          echo "Waiting for 90 seconds for EC2 instance to initialize..."
           sleep 90
             
       - name: Copy Files to EC2
@@ -93,3 +93,9 @@ jobs:
             # Now, bring up the entire application stack, rebuilding the app if needed.
             echo "Starting application..."
             sudo /usr/bin/docker compose up --build -d
+
+      - name: Update DuckDNS
+        name: 'Update DuckDNS with new IP'
+        run: |
+          echo "Updating DuckDNS record for ${{ secrets.DUCKDNS_DOMAIN }}..."
+          curl "https://www.duckdns.org/update?domains=${{ secrets.DUCKDNS_DOMAIN }}&token=${{ secrets.DUCKDNS_TOKEN }}&ip=${{ needs.terraform.outputs.public_ip }}"
