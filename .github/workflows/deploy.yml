@@ -3,7 +3,7 @@ name: Deploy RAG App to EC2
 on:
   push:
     branches:
-      - main
+      - main-V2
 
 jobs:
   # Job to provision or update infrastructure using Terraform
