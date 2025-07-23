@@ -76,7 +76,7 @@ jobs:
             
             # Start only the database service in the background
             echo "Starting database service..."
-            sudo docker compose up -d db
+            sudo docker-compose up -d db
             
             # Wait for the database to initialize
             echo "Waiting for database to be ready..."
@@ -85,8 +85,8 @@ jobs:
             # Run the database migration inside a temporary container.
             # This is the best practice as it uses the app's environment.
             echo "Running database migration..."
-            sudo docker compose run --rm app python migrate_db.py
+            sudo docker-compose run --rm app python migrate_db.py
             
             # Now, bring up the entire application stack, rebuilding the app if needed.
             echo "Starting application..."
-            sudo docker compose up --build -d
+            sudo docker-compose up --build -d
