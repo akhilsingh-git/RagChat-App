@@ -10,6 +10,7 @@ HUGGING_FACE_HEADERS = {"Authorization": f"Bearer {HUGGING_FACE_API_TOKEN}"}
 EMBEDDING_API_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/TaylorAI/bge-micro"
 GENERATOR_API_URL = "https://api-inference.huggingface.co/models/TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 
+
 def run_rag_pipeline(db: Session, query: str, k: int = 3):
     """
     A generator function that performs the entire RAG pipeline and streams updates.

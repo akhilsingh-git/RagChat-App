@@ -29,3 +29,4 @@ def query_stream(request: Request, db: Session = Depends(get_db)):
 static_files_dir = os.path.join(os.path.dirname(__file__), "..", "public")
 app.mount("/", StaticFiles(directory=static_files_dir, html=True), name="static")
 
+

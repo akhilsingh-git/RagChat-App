@@ -26,3 +26,5 @@ def setup_logging():
         logger_factory=structlog.stdlib.LoggerFactory(),
         cache_logger_on_first_use=True,
     )
+
+    
