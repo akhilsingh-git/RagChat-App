@@ -1,82 +1,99 @@
 Production-Ready RAG System
-This project is a complete Retrieval-Augmented Generation (RAG) system built to demonstrate a full software development lifecycle, from custom component implementation to automated cloud deployment.
+This repository contains a complete, production-ready Retrieval-Augmented Generation (RAG) system. It features a custom vector database, a full-stack web application with a real-time chat interface, and a fully automated CI/CD pipeline for deployment to AWS EC2.
 
-What Was Done
-1. Custom Vector Database
-An in-memory vector database was built from scratch using Python and NumPy.
+<!-- Replace with a URL to a screenshot of your app -->
 
-It supports single and batch insertions of document embeddings.
+✨ Features
+Custom Vector Database: Built from scratch using Python, supporting pgvector for persistent storage.
 
-The search operation uses dot product similarity to retrieve the top-k most relevant documents for a given query.
+High-Speed Search: Implements an HNSW index for fast Approximate Nearest Neighbor (ANN) search.
 
-The implementation uses a simple but effective "flat index" for exact similarity search.
+Advanced RAG Pipeline: A sophisticated two-stage retrieval process using a bi-encoder for initial search and a cross-encoder for re-ranking, combined with Reciprocal Rank Fusion (RRF) for optimal relevance.
 
-2. RAG Components
-Text Embeddings: The TaylorAI/bge-micro model is used via the sentence-transformers library to generate vector embeddings for documents and queries.
+Streaming Chat Interface: A responsive frontend built with vanilla JavaScript that streams answers token-by-token for an excellent user experience.
 
-Text Generation: The gpt2 model is used via the transformers library to generate human-like answers based on the context retrieved from the vector database.
+Production-Grade Backend: A robust FastAPI backend serving the API and frontend.
 
-Data Source: The system loads its knowledge base from the provided documents.json file on startup.
+End-to-End Automation: Fully automated infrastructure provisioning (Terraform) and application deployment (GitHub Actions) to AWS EC2.
 
-3. Web Application
-A complete web application was created using the FastAPI framework.
+Built-in Observability: Structured logging and a Prometheus metrics endpoint (/metrics) for monitoring.
 
-A clean, responsive chat interface was built with vanilla HTML, Tailwind CSS, and JavaScript, allowing users to interact with the system.
+🛠️ Technology Stack
+Category
 
-The backend exposes a /api/query endpoint that handles the entire RAG pipeline: embedding the user's query, searching the database, and generating a final answer.
+Technology
 
-4. Development Environment
-Local Development: The application is configured to run locally with a single command (uvicorn api.index:app --reload). The local server serves both the backend API and the static frontend files.
+Backend
 
-Containerization: The application is fully containerized using Docker, allowing for consistent and portable deployments. A production-ready gunicorn server is used inside the container.
+FastAPI, Gunicorn
 
-How to Run
-Local Development (without Docker)
-Install dependencies:
+Database
 
+PostgreSQL + pgvector
+
+Frontend
+
+HTML, CSS, Vanilla JavaScript (with SSE)
+
+AI Models
+
+bge-micro (Embedding), ms-marco-MiniLM-L-6-v2 (Re-ranking), distilgpt2 (Generation)
+
+DevOps
+
+Docker, Docker Compose, Terraform, GitHub Actions
+
+Cloud
+
+AWS EC2
+
+🚀 Running Locally
+This project is fully containerized, making it easy to run locally with a single command.
+
+Prerequisites:
+
+Docker
+
+Docker Compose
+
+Instructions:
+
+Clone the repository:
+
+git clone https://github.com/your-username/your-repo-name.git
+cd your-repo-name
+
+Create the environment file:
+Create a .env file in the root directory and add the following line:
+
+DATABASE_URL=postgresql://raguser:ragpassword@localhost:5432/ragdb
+
+Start the database:
+
+docker-compose up -d db
+
+Run the database migration:
+This script will create the necessary tables and populate the database with the sample data.
+
+# Install dependencies locally for the script
 pip install -r requirements.txt
+python migrate_db.py
 
-Run the server:
+Launch the application:
 
-uvicorn api.index:app --reload
+docker-compose up --build
 
-Open your browser to http://127.0.0.1:8000.
+The application will be available at http://localhost:8000.
 
-Running with Docker
-Build the Docker image:
+📈 Future Roadmap
+While this is a complete and robust system, the following enhancements would be the next steps for scaling and improving quality:
 
-docker build -t rag-app .
+RAG Evaluation Framework: Implement an offline evaluation pipeline using a framework like RAGAs to quantitatively measure faithfulness, answer_relevancy, and context_recall before deploying changes.
 
-Run the Docker container:
+More Powerful Generator: Upgrade from distilgpt2 to a more advanced open-source model (like a fine-tuned Llama 3) for higher-quality answer synthesis.
 
-docker run -p 8000:8000 rag-app
+Managed Database Service: For true production resilience, migrate the self-hosted PostgreSQL container to a managed service like Amazon RDS for PostgreSQL.
 
-Open your browser to http://127.0.0.1:8000.
+Separate Frontend Deployment: Decouple the frontend from the backend API by deploying it as a static site to a service like Vercel or AWS S3/CloudFront for better performance and scalability.
 
-What More Would I Do With More Time?
-The current implementation is a robust prototype. To make it truly production-grade and scalable, I would focus on the following enhancements:
-
-1. Persistent & Scalable Vector Database
-Problem: The current in-memory database does not persist data between server restarts and cannot scale to millions of documents.
-
-Solution: I would replace the custom NumPy database with a production-ready vector database solution like PostgreSQL with the pgvector extension. This provides data persistence, transactional integrity, and the ability to leverage existing database management tools.
-
-2. Approximate Nearest Neighbor (ANN) Search
-Problem: The current "flat index" performs an exhaustive search, which becomes slow with a large number of vectors.
-
-Solution: I would implement an ANN index, such as HNSW (Hierarchical Navigable Small World), which is available in pgvector. This would reduce search latency from linear O(N) to logarithmic O(log N), enabling real-time search over millions of documents.
-
-3. Streaming API Responses
-Problem: The user has to wait for the entire answer to be generated before seeing any text, which can feel slow.
-
-Solution: I would refactor the /api/query endpoint to use Server-Sent Events (SSE). This would allow the backend to stream the generated answer token-by-token to the frontend, dramatically improving the perceived responsiveness of the application.
-
-4. Enhanced Observability
-Problem: The current application has minimal logging and no metrics.
-
-Solution: I would integrate structured logging (e.g., using structlog) and expose key application metrics (e.g., query latency, tokens generated) in a Prometheus format. This data is crucial for monitoring system health, performance, and cost in a production environment.
-
-5. Infrastructure as Code (IaC)
-Problem: The Vercel project and its settings are configured manually.
-
-Solution: While we have a CI/CD pipeline, I would add Terraform to manage the Vercel project itself, including environment variables and domain settings. This ensures the entire cloud infrastructure is version-controlled and reproducible.
+Enhanced Security: Implement authentication on API endpoints and tighten the security group rules to restrict access to known IP addresses.
