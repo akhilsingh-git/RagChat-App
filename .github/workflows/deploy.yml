@@ -80,7 +80,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
-            # Navigate to the project directory and run docker-compose
-            # Use the modern 'docker compose' command (with a space)
+            # Navigate to the project directory
             cd ~/rag-app
-            docker compose up --build -d
+            # Use sudo to ensure the docker command is found and has permissions
+            sudo docker compose up --build -d
