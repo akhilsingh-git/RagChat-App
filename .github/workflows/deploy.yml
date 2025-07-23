@@ -1,3 +1,5 @@
+# .github/workflows/deploy.yml
+
 name: Deploy RAG App to EC2
 
 on:
@@ -23,7 +25,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1 # Must match the region in your .tf file
+          aws-region: ap-south-1 # Must match the region in your .tf file
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -79,5 +81,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
             # Navigate to the project directory and run docker-compose
+            # Use the modern 'docker compose' command (with a space)
             cd ~/rag-app
-            docker-compose up --build -d
+            docker compose up --build -d
