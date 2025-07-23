@@ -48,26 +48,19 @@ This repository contains a complete, **production-ready Retrieval-Augmented Gene
 ```bash
 git clone https://github.com/your-username/your-repo-name.git
 cd your-repo-name
+
 🛠️ Create a .env File
-env
-Copy
-Edit
 DATABASE_URL=postgresql://raguser:ragpassword@localhost:5432/ragdb
+
 🐘 Start the Vector Database
-bash
-Copy
-Edit
 docker-compose up -d db
+
 🧱 Run Migrations + Load Data
-bash
-Copy
-Edit
 pip install -r requirements.txt
 python migrate_db.py
+
 🚀 Launch the Full App
-bash
-Copy
-Edit
+
 docker-compose up --build
 Visit: http://localhost:8000
 
@@ -86,17 +79,6 @@ Security	Add AuthN/Z to APIs + stricter AWS security group rules
 MIT © Your Name
 
 🙋‍♂️ Questions?
-Feel free to open issues or reach out at @yourhandle
-
-yaml
-Copy
-Edit
+Feel free to open issues or reach out at singhakhil2018@gmail.com
 
 ---
-
-Let me know if you want:
-- the `docker-compose.yml` and `migrate_db.py` templates
-- a copy of the Terraform config
-- or help with GitHub Actions for CI/CD
-
-I can also auto-generate all of these for you.
