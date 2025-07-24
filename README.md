@@ -1,78 +1,131 @@
-# 🧠 Shopos RAG System
+# 🧠 ShopOS-Production-Ready RAG System
 
-This repository contains a complete, **production-ready Retrieval-Augmented Generation (RAG) system**. It features:
+A fully modernized Retrieval-Augmented Generation (RAG) system featuring:
 
-- A custom vector database with `pgvector` support
-- A full-stack web app with real-time streaming chat
-- Automated CI/CD pipeline to AWS EC2 with Terraform + GitHub Actions
+- **Persistent vector database** with PostgreSQL + pgvector
+- **Scalable ANN search** using HNSW
+- **Advanced RAG pipeline** (bi-encoder → cross-encoder re-ranking → RRF fusion, upgraded to TinyLlama)
+- **Streaming chat interface** built with SSE for real-time responses
+- **FastAPI + Gunicorn backend** containerized and orchestrated with Docker
+- **CI/CD pipeline** with Terraform & GitHub Actions for automated provisioning & deployment to AWS EC2
+- **Nginx reverse proxy** for clean domain access
+- **Managed secrets** injected via environment variables and GitHub Secrets
 
----
-
-## ✨ Features
-
-- ✅ **Custom Vector DB**: Built from scratch in Python, with optional `pgvector` for persistence
-- ⚡ **High-Speed ANN Search**: Uses HNSW index for fast vector retrieval
-- 🧠 **Advanced RAG Pipeline**: Bi-encoder → cross-encoder re-ranking → RRF fusion
-- 💬 **Streaming Chat Interface**: Real-time token-by-token response via Server-Sent Events (SSE)
-- 🔧 **FastAPI Backend**: Serves both REST API and frontend UI
-- 🚀 **CI/CD + Infra as Code**: Fully automated AWS deployment with Terraform + GitHub Actions
-- 📊 **Built-in Observability**: Prometheus `/metrics` + structured logging
+> 🎯 This project evolved from a simple NumPy prototype into a robust, production-grade application.
 
 ---
 
-## 🛠️ Tech Stack
+## 📝 Project Evolution
 
-| Category     | Technologies                                                                 |
-|--------------|-------------------------------------------------------------------------------|
-| **Backend**  | FastAPI, Gunicorn                                                            |
-| **Database** | PostgreSQL + `pgvector`                                                      |
-| **Frontend** | HTML, Tailwind CSS, Vanilla JS (with SSE)                                    |
-| **AI Models**| `bge-micro` (embedding), `MiniLM` (re-ranking), `distilgpt2` (generation)     |
-| **DevOps**   | Docker, Docker Compose, Terraform, GitHub Actions                            |
-| **Cloud**    | AWS EC2                                                                      |
+| Phase                 | Improvement                                                                                     |
+|----------------------|--------------------------------------------------------------------------------------------------|
+| **In-memory DB → Persistent** | Swapped NumPy array for PostgreSQL + pgvector to support durable and scalable storage.         |
+| **Exact → Approximate Search**  | Added HNSW index to scale ANN search from O(N) to O(log N) latency.                             |
+| **Basic → Advanced Retrieval** | Implemented two-stage retrieval: fast bi-encoder search → cross-encoder re-ranking → RRF fusion; upgraded generator from GPT-2 to TinyLlama. |
+| **Sync → Streaming UI**         | Redesigned UI to use Server-Sent Events (SSE) for token-by-token response streaming.             |
+| **Manual → Automated Deploy**   | Introduced Terraform + GitHub Actions to provision EC2, deploy containers, migrate DB, update DNS. |
+| **Direct Access → Reverse Proxy** | Added Nginx to serve the app on port 80 via clean domain (`your-domain.duckdns.org`).            |
+| **Hardcoded → Secure Secrets**  | Migrated secrets to environment variables managed via GitHub Secrets; removed from source code.     |
 
 ---
 
-## 🚀 Getting Started (Local)
+## 📁 Repository Structure
 
-> This project is fully containerized — ready to spin up locally in minutes.
+```text
+.github/workflows/      # CI/CD definition (deploy.yml)
+api/                    # FastAPI app core logic & routes
+nginx/                  # nginx.conf for reverse proxy
+public/                 # Frontend files (index.html, script.js)
+.env                    # Local env variables (not committed)
+docker-compose.yml      # Defines app, db, nginx services
+Dockerfile              # Builds the FastAPI application
+main.tf                 # Terraform infra provisioning (EC2, SG, etc.)
+migrate_db.py           # Initialize PostgreSQL + load documents.json
+requirements.txt        # Python dependencies
+🚀 Running Locally
+Prerequisites
+Docker & Docker Compose installed
 
-### 🧩 Prerequisites
+Python 3.10+ (for migration script)
 
-- Docker + Docker Compose
-- Python 3.10+
-- PostgreSQL client (optional for manual DB access)
+Quick Setup
 
-### 📦 Clone the Repository
+git clone https://github.com/your-username/your-repo-name.git
+cd your-repo-name
+Create .env with:
 
-```bash
-git clone (https://github.com/akhilsingh-git/Shopos-RagApp.git)
+DATABASE_URL=postgresql://username:password@localhost:5432/ragdb
 
-🛠️ Create a .env File
-DATABASE_URL=postgresql://raguser:ragpassword@localhost:5432/ragdb
-
-🐘 Start the Vector Database
+# Spin up the database
 docker-compose up -d db
 
-🧱 Run Migrations + Load Data
+# Migrate and load data
 pip install -r requirements.txt
 python migrate_db.py
 
-🚀 Launch the Full App
-
+# Launch the full stack
 docker-compose up --build
-Visit: http://localhost:8000
+Visit: http://localhost
 
-📈 Roadmap / Future Improvements
-Area	Enhancement
-Evaluation	Add RAG evaluation pipeline using RAGAs
-Model Quality	Upgrade to LLaMA 3 or Mistral 7B with quantization
-Database Resilience	Move from containerized Postgres to managed RDS
-Frontend Hosting	Serve static UI via Vercel or AWS S3 + CloudFront
-Security	Add AuthN/Z to APIs + stricter AWS security group rules
+###✅ Automated Deployment to AWS EC2
+Prerequisites
+AWS account & permissions to manage EC2, SGs, etc.
 
-🖼️ Screenshot
-![Diagram](https://github.com/user-attachments/assets/62762616-a7f5-4e5b-9e6a-c4bb243d8c66)
+DuckDNS account with an existing domain
 
-🙋‍♂️ Questions?
-Feel free to open issues or reach out at singhakhil2018@gmail.com
+AWS EC2 SSH key pair with PEM file
+
+Setup
+Set your AWS key name in main.tf:
+key_name = "YourEC2KeyName"
+In GitHub Settings → Secrets and variables → Actions, add:
+
+nginx
+Copy
+Edit
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+EC2_SSH_PRIVATE_KEY   # PEM contents
+DUCKDNS_DOMAIN
+DUCKDNS_TOKEN
+POSTGRES_USER
+POSTGRES_PASSWORD
+POSTGRES_DB
+
+Deploy
+Push any changes to the main-V2 branch. The GitHub Actions workflow will:
+
+Run terraform apply to provision AWS resources
+
+SSH into the EC2 instance and deploy containers
+
+Run migrations and seed the database
+
+Update your DuckDNS domain with the new public IP
+
+Provide a final URL for your live app 
+
+http://shopos-rag.duckdns.org/
+
+####📈 Extension Ideas
+Add offline RAG evaluation (e.g., RAGAs) for quality tracking
+
+Upgrade to a more capable generator (fine-tuned LLaMA)
+
+Migrate database to managed AWS RDS for high availability
+
+Deploy frontend separately (e.g., Vercel or S3 + CloudFront)
+
+Add authentication and tighten security rules on EC2
+
+#####🖼 Screenshot
+<!-- TODO: Add a screenshot or demo GIF here -->
+🧭 License & Contributions
+Licensed under MIT. Contributions, feedback, and issue reports are welcome!
+
+#######💬 Need Help?
+Open an issue or contact me via GitHub.
+
+Enjoy exploring the RAG system!
+
+The writeup is present in submission.doc
