@@ -94,7 +94,7 @@ jobs:
 
       - name: 'Update DDNS with new IP'
         run: |
-          echo "Updating DDNS record for ${{ secrets.DDNS_DOMAIN }}..."
-          response=$(curl -fsSL "https://www.duckdns.org/update?domains=shopos-rag&token=${{ secrets.DDNS_TOKEN }}&ip=${{ needs.terraform.outputs.public_ip }}")
+          echo "Updating DDNS record for ${{ secrets.DUCKDNS_DOMAIN }}..."
+          response=$(curl -fsSL "https://www.duckdns.org/update?domains=${{ secrets.DUCKDNS_DOMAIN }}&token=${{ secrets.DUCKDNS_TOKEN }}&ip=${{ needs.terraform.outputs.public_ip }}")
           echo "DDNS update response: $response"
           [[ "$response" == "OK" ]] || (echo "DDNS update failed" && exit 1)
