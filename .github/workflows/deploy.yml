@@ -76,19 +76,24 @@ jobs:
             # Navigate to the project directory
             cd ~/rag-app
             
-            # Start only the database service in the background
+            # Securely create the .env file from GitHub Secrets
+            echo "Creating .env file..."
+            echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" > .env
+            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+            echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+            
+            # Start the database service
             echo "Starting database service..."
             sudo /usr/bin/docker compose up -d db
             
-            # Wait for the database to initialize
             echo "Waiting for database to be ready..."
             sleep 15
             
-            # Run the database migration inside a temporary container.
+            # Run the database migration
             echo "Running database migration..."
             sudo /usr/bin/docker compose run --rm app python migrate_db.py
             
-            # Now, bring up the entire application stack, including the new Nginx service.
+            # Start the full application stack
             echo "Starting application with Nginx..."
             sudo /usr/bin/docker compose up --build -d
 
