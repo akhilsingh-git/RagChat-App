@@ -1,0 +1,19 @@
+# Use the official AWS public ECR image for Python 3.11 on Lambda
+# This image contains the necessary Lambda Runtime Interface Client (RIC)
+FROM public.ecr.aws/lambda/python:3.11
+
+# Set the working directory inside the container
+WORKDIR ${LAMBDA_TASK_ROOT}
+
+# Copy the requirements file and install dependencies
+# This bakes all the heavy libraries into the container image
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the application code (the api and public folders)
+COPY ./api ./api
+COPY ./public ./public
+
+# Set the command that the Lambda runtime will execute.
+# This points to your FastAPI application instance.
+CMD [ "api.index.app" ]
