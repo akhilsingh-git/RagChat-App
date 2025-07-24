@@ -23,16 +23,22 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
+# 2. ECR Repository to store the Lambda container image
+resource "aws_ecr_repository" "rag_app_ecr" {
+  name                 = "rag-app-lambda"
+  image_tag_mutability = "MUTABLE"
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
 
-# 3. UPDATED: Create the Lambda Function from a Container Image
+# 3. Create the Lambda Function from a Container Image
 resource "aws_lambda_function" "rag_app_lambda" {
   function_name = "RAG-App-Function"
   role          = aws_iam_role.rag_lambda_role.arn
   package_type  = "Image"
-  timeout       = 60     # Increased timeout for cold starts
-  memory_size   = 2048   # Increased memory for AI models
-
-  # The specific image URI will be provided by the CI/CD pipeline
+  timeout       = 60
+  memory_size   = 2048
   image_uri     = var.image_uri
 
   environment {
@@ -43,7 +49,7 @@ resource "aws_lambda_function" "rag_app_lambda" {
   }
 }
 
-# 4. API Gateway resources (no changes here)
+# 4. API Gateway resources
 resource "aws_apigatewayv2_api" "rag_api" {
   name          = "RAG-App-API"
   protocol_type = "HTTP"
@@ -57,8 +63,16 @@ resource "aws_apigatewayv2_integration" "rag_api_integration" {
 
 resource "aws_apigatewayv2_route" "rag_api_route" {
   api_id    = aws_apigatewayv2_api.rag_api.id
-  route_key = "ANY /{proxy+}"
+  route_key = "$default" # Use the $default route for a simple API
   target    = "integrations/${aws_apigatewayv2_integration.rag_api_integration.id}"
+}
+
+# --- NEW: Create the API Gateway Stage ---
+# This is the crucial missing piece that makes the API live.
+resource "aws_apigatewayv2_stage" "rag_api_stage" {
+  api_id      = aws_apigatewayv2_api.rag_api.id
+  name        = "$default" # The default stage is automatically invoked
+  auto_deploy = true
 }
 
 resource "aws_lambda_permission" "api_gateway_permission" {
@@ -82,13 +96,12 @@ variable "hugging_face_api_token" {
   sensitive   = true
 }
 
-# NEW: Input variable for the image URI
 variable "image_uri" {
   description = "The URI of the Docker image in ECR."
   type        = string
 }
 
-# 6. Output the API Gateway URL
+# 6. UPDATED: Output the final, public URL
 output "api_endpoint_url" {
-  value = aws_apigatewayv2_api.rag_api.api_endpoint
+  value = aws_apigatewayv2_stage.rag_api_stage.invoke_url
 }
