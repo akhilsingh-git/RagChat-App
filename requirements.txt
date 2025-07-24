@@ -13,3 +13,5 @@ python-dotenv
 structlog
 python-json-logger
 requests
+# NEW: Add the Mangum adapter for AWS Lambda
+mangum
