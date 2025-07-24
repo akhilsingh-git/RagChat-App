@@ -5,6 +5,13 @@ FROM public.ecr.aws/lambda/python:3.11
 # Set the working directory inside the container
 WORKDIR ${LAMBDA_TASK_ROOT}
 
+# --- NEW: Install system build dependencies ---
+# The base image is minimal and lacks compilers. We need to install them
+# to build packages like numpy from source.
+RUN yum update -y && \
+    yum install -y gcc make cmake unzip git && \
+    yum clean all
+
 # Copy the requirements file and install dependencies
 # This bakes all the heavy libraries into the container image
 COPY requirements.txt .
