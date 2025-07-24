@@ -9,23 +9,31 @@ services:
       - POSTGRES_DB=ragdb
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
     restart: unless-stopped
 
-  # The RAG Application Service
+  # The RAG Application Service (no longer exposes ports directly)
   app:
     container_name: rag_app
-    # Build the image from the Dockerfile in the current directory
     build: .
-    ports:
-      - "8000:8000"
-    # Depend on the database service
+    # Note: The ports section is removed from here.
     depends_on:
       - db
-    # Pass the database connection string as an environment variable
     environment:
       - DATABASE_URL=postgresql://raguser:ragpassword@db:5432/ragdb
+    restart: unless-stopped
+
+  # NEW: The Nginx Reverse Proxy Service
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: rag_proxy
+    ports:
+      # Map port 80 of the host (EC2 instance) to port 80 of the nginx container.
+      - "80:80"
+    volumes:
+      # Mount our custom nginx configuration file into the container.
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
     restart: unless-stopped
 
 volumes:
