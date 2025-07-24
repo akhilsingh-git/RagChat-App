@@ -94,13 +94,7 @@ jobs:
             echo "Starting application with Nginx..."
             sudo /usr/bin/docker compose up --build -d
 
-      - name: 'Update DuckDNS with new IP'
-        run: |
-          echo "Updating DuckDNS record for ${{ secrets.DUCKDNS_DOMAIN }}..."
-          response=$(curl -fsSL "https://www.duckdns.org/update?domains=${{ secrets.DUCKDNS_DOMAIN }}&token=${{ secrets.DUCKDNS_TOKEN }}&ip=${{ needs.terraform.outputs.public_ip }}")
-          echo "DuckDNS update response: $response"
-          [[ "$response" == "OK" ]] || (echo "DuckDNS update failed" && exit 1)
 
       - name: 'Print Final Domain URL'
         run: |
-          echo "Your application is now available at: http://${{ secrets.DUCKDNS_DOMAIN }}.duckdns.org"
+          echo "Your application is now available at: http://shopos-ragapp.ddns.net"
