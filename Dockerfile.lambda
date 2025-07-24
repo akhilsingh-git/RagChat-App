@@ -8,8 +8,9 @@ WORKDIR ${LAMBDA_TASK_ROOT}
 # --- NEW: Install system build dependencies ---
 # The base image is minimal and lacks compilers. We need to install them
 # to build packages like numpy from source.
+# We are adding gcc-c++ to provide the C++ compiler.
 RUN yum update -y && \
-    yum install -y gcc make cmake unzip git && \
+    yum install -y gcc gcc-c++ make cmake unzip git && \
     yum clean all
 
 # Copy the requirements file and install dependencies
