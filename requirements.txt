@@ -4,12 +4,12 @@ pydantic
 sentence-transformers
 torch
 transformers
-numpy
-gunicorn
+# Pinning numpy to a version compatible with the Lambda image's older GCC compiler
+numpy==1.21.6
 sqlalchemy
 psycopg2-binary
 pgvector
 python-dotenv
 structlog
-prometheus-fastapi-instrumentator
 python-json-logger
+requests
