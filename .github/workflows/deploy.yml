@@ -5,7 +5,7 @@ name: Deploy RAG App to AWS Lambda
 on:
   push:
     branches:
-      - main-lambda # Or your preferred branch for Lambda deployments
+      - main-V4
 
 jobs:
   deploy-lambda:
