@@ -5,7 +5,7 @@ name: Deploy RAG App to AWS Lambda
 on:
   push:
     branches:
-      - main-V4
+      - main-lambda # Or your preferred branch for Lambda deployments
 
 jobs:
   deploy-lambda:
@@ -16,23 +16,28 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install Dependencies
-        run: |
-          pip install -r requirements.txt -t ./package
-          cp -r ./api ./package/
-          cp -r ./public ./package/
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1 # Must match the region in your .tf file
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          # This must match the ECR repository name from lambda.tf
+          ECR_REPOSITORY: rag-app-lambda
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile.lambda .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image_uri=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -44,4 +49,5 @@ jobs:
         run: |
           terraform apply -auto-approve \
             -var="database_url=${{ secrets.DATABASE_URL }}" \
-            -var="hugging_face_api_token=${{ secrets.HUGGING_FACE_API_TOKEN }}"
+            -var="hugging_face_api_token=${{ secrets.HUGGING_FACE_API_TOKEN }}" \
+            -var="image_uri=${{ steps.build-image.outputs.image_uri }}"
