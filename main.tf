@@ -7,7 +7,7 @@ provider "aws" {
 
 # 1. Define the Security Group to allow inbound traffic
 resource "aws_security_group" "rag_app_sg" {
-  name        = "rag-app-sg"
+  name        = "shopos-rag-app-sg"
   description = "Allow HTTP and SSH inbound traffic"
 
   # Allow inbound HTTP traffic on port 8000 for the application
@@ -26,6 +26,19 @@ resource "aws_security_group" "rag_app_sg" {
     cidr_blocks = ["0.0.0.0/0"] # WARNING: For production, restrict this to your IP
   }
 
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # http
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # https
+  }
   # Allow all outbound traffic
   egress {
     from_port   = 0
@@ -91,7 +104,7 @@ resource "aws_instance" "rag_app_server" {
               EOF
 
   tags = {
-    Name = "RAG-App-Server"
+    Name = "Shopos-RAG-App-Server"
   }
 }
 
