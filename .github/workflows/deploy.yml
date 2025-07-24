@@ -1,22 +1,31 @@
-name: Deploy RAG App to EC2
+# .github/workflows/deploy-lambda.yml
+
+name: Deploy RAG App to AWS Lambda
 
 on:
   push:
     branches:
-      - main-V2
+      - main-V4
 
 jobs:
-  # Job to provision or update infrastructure using Terraform
-  terraform:
-    name: 'Terraform Apply'
+  deploy-lambda:
+    name: 'Deploy to Lambda'
     runs-on: ubuntu-latest
-    outputs:
-      # This output will be used by the next job
-      public_ip: ${{ steps.apply.outputs.public_ip }}
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt -t ./package
+          cp -r ./api ./package/
+          cp -r ./public ./package/
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -31,70 +40,8 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Validate
-        run: terraform validate
-
       - name: Terraform Apply
-        id: apply
         run: |
-          terraform apply -auto-approve
-          # Extract the public IP output from Terraform and set it for the next job
-          echo "public_ip=$(terraform output -raw instance_public_ip)" >> $GITHUB_OUTPUT
-
-  # Job to deploy the application to the newly created EC2 instance
-  deploy:
-    name: 'Deploy Application'
-    runs-on: ubuntu-latest
-    # This job depends on the terraform job completing successfully
-    needs: terraform
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Wait for EC2 to be ready
-        run: |
-          echo "Waiting for 90 seconds for EC2 instance to initialize..."
-          sleep 90
-            
-      - name: Copy Files to EC2
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ needs.terraform.outputs.public_ip }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          source: "."
-          target: "~/rag-app"
-          
-      - name: Deploy and Run Application on EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ needs.terraform.outputs.public_ip }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          script: |
-            # Navigate to the project directory
-            cd ~/rag-app
-            
-            # Start only the database service in the background
-            echo "Starting database service..."
-            sudo /usr/bin/docker compose up -d db
-            
-            # Wait for the database to initialize
-            echo "Waiting for database to be ready..."
-            sleep 15
-            
-            # Run the database migration inside a temporary container.
-            echo "Running database migration..."
-            sudo /usr/bin/docker compose run --rm app python migrate_db.py
-            
-            # Now, bring up the entire application stack, including the new Nginx service.
-            echo "Starting application with Nginx..."
-            sudo /usr/bin/docker compose up --build -d
-
-      - name: 'Update DDNS with new IP'
-        run: |
-          echo "Updating DDNS record for ${{ secrets.DDNS_DOMAIN }}..."
-          response=$(curl -fsSL "https://www.duckdns.org/update?domains=shopos-rag&token=${{ secrets.DDNS_TOKEN }}&ip=${{ needs.terraform.outputs.public_ip }}")
-          echo "DDNS update response: $response"
-          [[ "$response" == "OK" ]] || (echo "DDNS update failed" && exit 1)
+          terraform apply -auto-approve \
+            -var="database_url=${{ secrets.DATABASE_URL }}" \
+            -var="hugging_face_api_token=${{ secrets.HUGGING_FACE_API_TOKEN }}"
