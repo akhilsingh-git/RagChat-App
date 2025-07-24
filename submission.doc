@@ -1,0 +1,68 @@
+Project Documentation: Production-Ready RAG System
+This document outlines the work completed for the engineering assessment and details a strategic roadmap for future enhancements.
+
+What Was Done
+A complete, end-to-end Retrieval-Augmented Generation (RAG) system was successfully built and deployed, demonstrating a full-lifecycle approach to software engineering. The project went significantly beyond the initial requirements to create a robust, automated, and production-ready application.
+
+1. Core RAG System Implementation
+Met Initial Requirements: The initial prototype was built precisely to specification, featuring a custom in-memory vector database using NumPy, BGE-micro for embeddings, and GPT-2 for generation.
+
+Advanced Retrieval Pipeline: The system was upgraded to a sophisticated two-stage retrieval process. It uses a fast vector search for initial candidate selection, followed by a more accurate CrossEncoder model for re-ranking. Reciprocal Rank Fusion (RRF) was implemented to intelligently combine the results of both stages, maximizing context relevance.
+
+Upgraded Generation Quality: The initial GPT-2 model was upgraded to TinyLlama/TinyLlama-1.1B-Chat-v1.0, an instruction-tuned model. This, combined with a more structured and robust prompting strategy, significantly improved the coherence and factual accuracy of the generated answers.
+
+2. Production-Grade Infrastructure
+Persistent Vector Store: The initial in-memory database was replaced with a production-grade PostgreSQL database running the pgvector extension. This ensures data persistence, scalability, and transactional integrity.
+
+High-Speed ANN Search: An HNSW (Hierarchical Navigable Small World) index was implemented on the vector column in the database, reducing search latency from linear to logarithmic time, making the system scalable to millions of documents.
+
+Containerization: The entire application stack, including the FastAPI application, the PostgreSQL database, and a reverse proxy, was containerized using Docker and orchestrated with Docker Compose.
+
+3. End-to-End Automation (GitOps)
+Infrastructure as Code (IaC): Terraform was used to declaratively define and manage all necessary cloud infrastructure on AWS, including the EC2 instance and associated security groups.
+
+CI/CD Pipeline: A comprehensive GitHub Actions workflow was created to automate the entire deployment process. On every push to the main branch, the pipeline automatically:
+
+Provisions or updates the AWS infrastructure using Terraform.
+
+Waits for the EC2 instance to be ready.
+
+Securely copies the entire application source code to the server.
+
+Runs the database migration script.
+
+Builds and starts all application containers using Docker Compose.
+
+Dynamic DNS: The pipeline automatically updates a DuckDNS domain with the new public IP of the EC2 instance after each deployment, providing a stable and user-friendly URL to access the application.
+
+4. Enhanced User Experience
+Reverse Proxy: An Nginx reverse proxy was implemented to handle incoming web traffic on the standard port 80 and forward it to the application running on port 8000. This allows users to access the application via the simple DuckDNS domain without needing to specify a port.
+
+Streaming Responses: The application was re-architected to stream answers to the user token-by-token using Server-Sent Events (SSE). This dramatically improves the perceived responsiveness of the chat interface.
+
+What More Would Be Done with More Time?
+While the current system is robust and feature-complete, the following steps would be taken to further enhance its enterprise-readiness.
+
+Implement a Formal RAG Evaluation Framework:
+
+Problem: The quality of the RAG pipeline is currently assessed qualitatively.
+
+Solution: Build an offline evaluation pipeline using a framework like RAGAs. This would allow for the quantitative measurement of key metrics like faithfulness, answer_relevancy, and context_recall. Any changes to the models or prompting strategies could be validated against this benchmark before being deployed.
+
+Migrate to a Managed Database Service:
+
+Problem: The PostgreSQL database is currently running in a Docker container on the same EC2 instance as the application, which is not ideal for production resilience.
+
+Solution: Migrate the database to a managed service like Amazon RDS for PostgreSQL. This would offload the immense operational burden of managing backups, security patching, replication, and scaling to AWS, allowing the development team to focus solely on the application.
+
+Enhance Observability:
+
+Problem: While the application has structured logging, it lacks comprehensive metrics and tracing.
+
+Solution: Integrate a full observability stack. Use the existing Prometheus endpoint to scrape metrics into a Prometheus server and visualize them with Grafana dashboards. Implement distributed tracing (e.g., with OpenTelemetry) to follow the lifecycle of a request from the API gateway through the RAG pipeline to the database and back.
+
+Secure API Endpoints:
+
+Problem: The API is currently open to the public.
+
+Solution: Implement an authentication layer. This would likely involve requiring an API key in the request headers and using FastAPI's security utilities to validate it, ensuring that only authorized clients can interact with the service.
