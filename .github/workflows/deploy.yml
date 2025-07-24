@@ -1,5 +1,3 @@
-# .github/workflows/deploy.yml
-
 name: Deploy RAG App to EC2
 
 on:
@@ -94,7 +92,9 @@ jobs:
             echo "Starting application with Nginx..."
             sudo /usr/bin/docker compose up --build -d
 
-
-      - name: 'Print Final Domain URL'
+      - name: 'Update DDNS with new IP'
         run: |
-          echo "Your application is now available at: http://shopos-ragapp.ddns.net"
+          echo "Updating DDNS record for ${{ secrets.DDNS_DOMAIN }}..."
+          response=$(curl -fsSL "https://www.duckdns.org/update?domains=shopos-rag&token=${{ secrets.DDNS_TOKEN }}&ip=${{ needs.terraform.outputs.public_ip }}")
+          echo "DDNS update response: $response"
+          [[ "$response" == "OK" ]] || (echo "DDNS update failed" && exit 1)
