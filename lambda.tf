@@ -2,74 +2,56 @@
 
 # Configure the AWS provider
 provider "aws" {
-  region = "ap-south-1" # You can change this to your preferred region
+  region = "ap-south-1"
 }
 
-# 1. IAM Role for Lambda Execution
-# This role grants the Lambda function permission to run and write logs.
+# 1. IAM Role for Lambda Execution (no changes here)
 resource "aws_iam_role" "rag_lambda_role" {
   name = "rag-app-lambda-execution-role"
-
   assume_role_policy = jsonencode({
     Version   = "2012-10-17",
     Statement = [{
       Action    = "sts:AssumeRole",
       Effect    = "Allow",
-      Principal = {
-        Service = "lambda.amazonaws.com"
-      }
+      Principal = { Service = "lambda.amazonaws.com" }
     }]
   })
 }
 
-# Attach the basic Lambda execution policy to the role
 resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
   role       = aws_iam_role.rag_lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# 2. Package the Application Code
-# This data source zips the entire project directory for deployment.
-data "archive_file" "lambda_zip" {
-  type        = "zip"
-  source_dir  = "${path.module}"
-  output_path = "${path.module}/lambda_payload.zip"
-  # Exclude files not needed in the Lambda package to reduce size
-  excludes = [
-    "lambda.tf",
-    "main.tf",
-    ".git",
-    ".github",
-    "__pycache__",
-    "README.md"
-  ]
+# 2. NEW: ECR Repository to store the Lambda container image
+resource "aws_ecr_repository" "rag_app_ecr" {
+  name                 = "rag-app-lambda"
+  image_tag_mutability = "MUTABLE" # Allows overwriting the 'latest' tag
+  image_scanning_configuration {
+    scan_on_push = true
+  }
 }
 
-# 3. Create the Lambda Function
+# 3. UPDATED: Create the Lambda Function from a Container Image
 resource "aws_lambda_function" "rag_app_lambda" {
   function_name = "RAG-App-Function"
   role          = aws_iam_role.rag_lambda_role.arn
-  handler       = "api.index.app" # The path to the FastAPI app instance
-  runtime       = "python3.11"
-  timeout       = 30 # Set timeout to 30 seconds
+  package_type  = "Image"
+  timeout       = 60     # Increased timeout for cold starts
+  memory_size   = 2048   # Increased memory for AI models
 
-  # Use the 'filename' attribute to point to the zip file
-  filename         = data.archive_file.lambda_zip.output_path
-  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
-
-  # Use Lambda container image for dependencies
-  package_type = "Zip"
+  # The specific image URI will be provided by the CI/CD pipeline
+  image_uri     = var.image_uri
 
   environment {
     variables = {
-      # Pass environment variables to the Lambda function
       DATABASE_URL             = var.database_url
       HUGGING_FACE_API_TOKEN   = var.hugging_face_api_token
     }
   }
 }
 
-# 4. Create the API Gateway to trigger the Lambda
+# 4. API Gateway resources (no changes here)
 resource "aws_apigatewayv2_api" "rag_api" {
   name          = "RAG-App-API"
   protocol_type = "HTTP"
@@ -106,6 +88,12 @@ variable "hugging_face_api_token" {
   description = "The API token for Hugging Face."
   type        = string
   sensitive   = true
+}
+
+# NEW: Input variable for the image URI
+variable "image_uri" {
+  description = "The URI of the Docker image in ECR."
+  type        = string
 }
 
 # 6. Output the API Gateway URL
