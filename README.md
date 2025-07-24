@@ -80,9 +80,6 @@ Set your AWS key name in main.tf:
 key_name = "YourEC2KeyName"
 In GitHub Settings → Secrets and variables → Actions, add:
 
-nginx
-Copy
-Edit
 AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY
 EC2_SSH_PRIVATE_KEY   # PEM contents
