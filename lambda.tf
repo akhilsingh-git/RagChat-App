@@ -23,14 +23,6 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# 2. NEW: ECR Repository to store the Lambda container image
-resource "aws_ecr_repository" "rag_app_ecr" {
-  name                 = "rag-app-lambda"
-  image_tag_mutability = "MUTABLE" # Allows overwriting the 'latest' tag
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-}
 
 # 3. UPDATED: Create the Lambda Function from a Container Image
 resource "aws_lambda_function" "rag_app_lambda" {
