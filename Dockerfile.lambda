@@ -5,16 +5,12 @@ FROM public.ecr.aws/lambda/python:3.10
 # Set the working directory inside the container
 WORKDIR ${LAMBDA_TASK_ROOT}
 
-# --- NEW: Install system build dependencies ---
-# The base image is minimal and lacks compilers. We need to install them
-# to build packages like numpy from source.
-# We are adding gcc-c++ to provide the C++ compiler.
+# Install system build dependencies
 RUN yum update -y && \
     yum install -y gcc gcc-c++ make cmake unzip git && \
     yum clean all
 
 # Copy the requirements file and install dependencies
-# This bakes all the heavy libraries into the container image
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -22,6 +18,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY ./api ./api
 COPY ./public ./public
 
-# Set the command that the Lambda runtime will execute.
-# This points to your FastAPI application instance.
-CMD [ "api.index.app" ]
+# UPDATED: Set the command to the Mangum handler
+# The format is <file_name>.<handler_object_name>
+CMD [ "api.index.handler" ]
