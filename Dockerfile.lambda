@@ -1,6 +1,6 @@
 # Use the official AWS public ECR image for Python 3.11 on Lambda
 # This image contains the necessary Lambda Runtime Interface Client (RIC)
-FROM public.ecr.aws/lambda/python:3.11
+FROM public.ecr.aws/lambda/python:3.10
 
 # Set the working directory inside the container
 WORKDIR ${LAMBDA_TASK_ROOT}
