@@ -18,14 +18,6 @@ resource "aws_security_group" "rag_app_sg" {
     cidr_blocks = ["0.0.0.0/0"] # Allow from any IP address
   }
 
-  # Allow inbound SSH traffic on port 22 for management
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # WARNING: For production, restrict this to your IP
-  }
-
   ingress {
     from_port   = 80
     to_port     = 80
